@@ -57,12 +57,30 @@ public class SensorController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Sensor found", content = @Content(schema = @Schema(implementation = Sensor.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input"),
-            @ApiResponse(responseCode = "409", description = "Sensor already exists") })
+            @ApiResponse(responseCode = "409", description = "Sensor does exist") })
     @GetMapping(value = "/Sensors/{id}")
     public ResponseEntity <Sensor> findById(@RequestParam long id) {
         Optional<Sensor> sensor = sensorRepo.findById(id);
         if (sensor.isPresent()) {
             return new ResponseEntity<>(sensor.get(), HttpStatus.OK);
+          } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+          }
+    }
+
+    @Operation(summary = "receive sensor reading", description = "", tags = { "Sensor" })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Sensor reading received", content = @Content(schema = @Schema(implementation = Sensor.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input"),
+            @ApiResponse(responseCode = "409", description = "something went wrong") })
+    @GetMapping(value = "/Sensors/submitReading")
+    public ResponseEntity <Sensor> submitSensorReading(@RequestParam long id, @RequestParam double currentValue) {
+        Optional<Sensor> sensor = sensorRepo.findById(id);
+        if (sensor.isPresent()) {
+          sensor.get().setCurrentValue(currentValue);
+          sensor.get().setTimeStamp(new Timestamp(System.currentTimeMillis()).toString());
+          Sensor newSensor = sensorRepo.save(sensor.get());
+            return new ResponseEntity<>(newSensor, HttpStatus.OK);
           } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
           }
