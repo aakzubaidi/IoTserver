@@ -102,6 +102,7 @@ public class SensorController {
         if (sensor.isPresent()) {
           Optional<Alert> alert = alertRepo.findById(alertID);
           alert.get().alertStatus.put(status, new Timestamp(System.currentTimeMillis()).toString());
+          alertRepo.save(alert.get());
             return new ResponseEntity<>(alert.get(), HttpStatus.OK);
           } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
