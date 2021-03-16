@@ -7,13 +7,26 @@ package com.iot.server.iotserver;
  */
 
 import java.io.Serializable;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -22,7 +35,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 
 @Entity
-@Table(name = "sensor")
+@Table(name = "sensors")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 
 public class Sensor implements Serializable {
@@ -31,11 +44,6 @@ public class Sensor implements Serializable {
      *
      */
     private static final long serialVersionUID = 6609840729642210969L;
-
-    protected Sensor() {}
-
-    
-
 
 
     @Schema(description = "Unique identifier of the sensor.", 
@@ -58,17 +66,26 @@ public class Sensor implements Serializable {
     @Size(max = 100)
     private String location;
 
-    @Schema(description = "Sensor Reading. This should be comming from the sensor", 
-    example = "1", required = true)
-    @NotBlank
-    private double currentValue;
 
-
+    @Schema(description = "Sensor creation data")
     @NotBlank
-    private String timeStamp;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_on")
+    private Date timeStamp;
 
     public long getId() {
         return id;
+    }
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "sensor", fetch = FetchType.LAZY,
+    cascade = CascadeType.ALL)
+    private List <Alert> alerts;
+
+
+    protected Sensor() {
+        this.alerts = new ArrayList<Alert>();
+        this.timeStamp = new Date();
     }
 
     public void setId(long id) {
@@ -91,21 +108,29 @@ public class Sensor implements Serializable {
         this.location = location;
     }
 
-    public double getCurrentValue() {
-        return currentValue;
-    }
 
-    public void setCurrentValue(double currentValue) {
-        this.currentValue = currentValue;
-    }
-
-    public String getTimeStamp() {
+    public @NotBlank Date getTimeStamp() {
         return timeStamp;
     }
 
-    public void setTimeStamp(String timeStamp) {
-        this.timeStamp = timeStamp;
+
+    public List<Alert> getAlerts() {
+        return this.alerts;
     }
+
+    public Alert registerAlert() {
+        Alert alert = new Alert();
+        alert.alertStatus.put(Status.Initial.toString(), new Timestamp(System.currentTimeMillis()).toString());
+        alert.setSensor(this);
+        return alert;
+    }
+
+    public Alert updateAlert(int id, String status) {
+        Alert alert = this.alerts.get(id);
+        alert.getAlertStatus().put(status, new Timestamp(System.currentTimeMillis()).toString());
+        return alert;
+    }
+
 
     
 }
