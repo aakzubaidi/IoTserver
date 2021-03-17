@@ -2,8 +2,6 @@ package com.iot.server.iotserver;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-
-
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -39,7 +37,7 @@ public class Alert implements Serializable {
     private long id;
 
 
-    @ElementCollection
+    @ElementCollection (fetch = FetchType.EAGER)
     Map <String, String> alertStatus;
 
 

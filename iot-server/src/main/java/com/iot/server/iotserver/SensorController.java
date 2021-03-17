@@ -8,13 +8,11 @@ import java.sql.Timestamp;
  * 
  */
 import java.util.Optional;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,6 +33,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Tag(name = "sensor", description = "the sensor API")
 public class SensorController {
 
+  @Autowired
+  private TaskExecutor taskExecutor;
+
+  
   @Autowired
   SensorRepo sensorRepo;
 
@@ -81,7 +83,7 @@ public class SensorController {
       @ApiResponse(responseCode = "400", description = "Invalid input"),
       @ApiResponse(responseCode = "409", description = "alert already exists") })
   @PostMapping(value = "/Sensors/registerAlert")
-  public ResponseEntity<Alert> registerAlert(@RequestParam long id) {
+  public ResponseEntity<Alert> registerAlert(@RequestParam long id) throws InterruptedException {
     Optional<Sensor> sensor = sensorRepo.findById(id);
     if (sensor.isPresent()) {
       Alert alert = sensor.get().registerAlert();
@@ -89,8 +91,21 @@ public class SensorController {
       System.out.println("From REST Controller: "+ newalert.getId());
 
       
-      final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-      scheduler.schedule(new AlertStatusChecker(newalert.getId()), 1, TimeUnit.SECONDS);
+      taskExecutor.execute(() -> {
+        try {
+          Thread.sleep(5000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+        Optional<Alert> alertQuery = alertRepo.findById(newalert.getId());
+        System.out.println("From REST controller: size is: " + alertQuery.get().getAlertStatus().size());
+        
+    });
+      //taskExecutor.execute(new AlertStatusChecker(newalert.getId()));
+      
+      
+      //final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+      //scheduler.schedule(new AlertStatusChecker(newalert.getId()), 1, TimeUnit.SECONDS);
 
 
       return new ResponseEntity<>(alert, HttpStatus.OK);
@@ -117,5 +132,7 @@ public class SensorController {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
   }
+
+
 
 }
