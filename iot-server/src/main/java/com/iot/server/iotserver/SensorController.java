@@ -98,7 +98,14 @@ public class SensorController {
           e.printStackTrace();
         }
         Optional<Alert> alertQuery = alertRepo.findById(newalert.getId());
-        System.out.println("From REST controller: size is: " + alertQuery.get().getAlertStatus().size());
+        int alertTupleSize = alertQuery.get().getAlertStatus().size();
+        System.out.println("From REST controller: size is: " + alertTupleSize);
+        if (alertTupleSize < 2)
+        {
+          System.out.println("From Server: Timeout waiting a confitmation from the Edge. I am now self-confirming the alert");
+          updateAlert(id, newalert.getId(), "Confirmed");
+        }
+
         
     });
       //taskExecutor.execute(new AlertStatusChecker(newalert.getId()));

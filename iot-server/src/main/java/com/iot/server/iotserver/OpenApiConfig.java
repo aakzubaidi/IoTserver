@@ -21,7 +21,7 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .components(new Components())
                 .info(new Info().title("IoT server API").description(
-                        "documentation of the IoT server API end-points"));
+                        "Written by Ali Alzubaidi"));
     }
     
 }
