@@ -29,6 +29,8 @@ dependencies {
 	runtimeOnly('com.h2database:h2')
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.5.5'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation group: 'io.micrometer', name: 'micrometer-registry-prometheus', version: '1.5.1'
 }
 
 test {

@@ -27,12 +27,32 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.Gauge;
+// import the Prometheus packages.
+
 
 @RestController
 @RequestMapping("/api")
 @Tag(name = "sensor", description = "the sensor API")
 public class SensorController {
 
+
+
+  Gauge REPORTEDTIM_GAUGE;
+  Gauge CONFIRMEDTIM_GAUGE;  
+
+    public SensorController(CollectorRegistry registry) {
+      REPORTEDTIM_GAUGE = Gauge.build()
+      .name("fire_reported_time").help("time of reporting fire event to the fire station.").register(registry);
+
+      CONFIRMEDTIM_GAUGE = Gauge.build()
+     .name("fire_confirmed_time").help("time of confiming fire event at server side.").register(registry);
+
+     REPORTEDTIM_GAUGE.set(0);
+     CONFIRMEDTIM_GAUGE.set(0);
+    }
+  
   @Autowired
   private TaskExecutor taskExecutor;
 
@@ -134,6 +154,8 @@ public class SensorController {
       Optional<Alert> alert = alertRepo.findById(alertID);
       alert.get().alertStatus.put(status, new Timestamp(System.currentTimeMillis()).toString());
       alertRepo.save(alert.get());
+      CONFIRMEDTIM_GAUGE.setToCurrentTime();
+      reportToFireStation();
       return new ResponseEntity<>(alert.get(), HttpStatus.OK);
     } else {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -141,5 +163,11 @@ public class SensorController {
   }
 
 
+  private void reportToFireStation ()
+  {
+
+    REPORTEDTIM_GAUGE.setToCurrentTime();
+  }
+  
 
 }
