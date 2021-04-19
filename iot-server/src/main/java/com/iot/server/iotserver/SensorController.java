@@ -48,9 +48,6 @@ public class SensorController {
 
       CONFIRMEDTIM_GAUGE = Gauge.build()
      .name("fire_confirmed_time").help("time of confiming fire event at server side.").register(registry);
-
-     REPORTEDTIM_GAUGE.set(0);
-     CONFIRMEDTIM_GAUGE.set(0);
     }
   
   @Autowired
@@ -76,6 +73,8 @@ public class SensorController {
       sensor.setName(name);
       sensor.setLocation(location);
       Sensor newSensor = sensorRepo.save(sensor);
+      REPORTEDTIM_GAUGE.set(0);
+      CONFIRMEDTIM_GAUGE.set(0);
       return new ResponseEntity<>(newSensor, HttpStatus.CREATED);
     } catch (Exception e) {
       return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
