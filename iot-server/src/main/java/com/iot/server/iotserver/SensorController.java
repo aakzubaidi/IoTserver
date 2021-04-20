@@ -166,6 +166,21 @@ public class SensorController {
   {
 
     REPORTEDTIM_GAUGE.setToCurrentTime();
+
+    taskExecutor.execute(() -> {
+      try {
+        Thread.sleep(5000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      System.out.println("Resting the metrics counters after 5 seconds");
+      REPORTEDTIM_GAUGE.set(0);
+      CONFIRMEDTIM_GAUGE.set(0);
+      
+  });
+    //taskExecutor.execute(new AlertStatusChecker(newalert.getId()));
+
+
   }
   
 

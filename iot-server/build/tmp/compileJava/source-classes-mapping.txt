@@ -10,7 +10,7 @@ com/iot/server/iotserver/Status.java
  com.iot.server.iotserver.Status
 com/iot/server/iotserver/AlertRepo.java
  com.iot.server.iotserver.AlertRepo
-com/iot/server/iotserver/SensorController.java
- com.iot.server.iotserver.SensorController
 com/iot/server/iotserver/Alert.java
  com.iot.server.iotserver.Alert
+com/iot/server/iotserver/SensorController.java
+ com.iot.server.iotserver.SensorController
